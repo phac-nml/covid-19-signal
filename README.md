@@ -23,8 +23,8 @@ If you use this software please [cite](https://doi.org/10.3390/v12080895):
 ## Contents:
 
 - [Setup Instructions](#setup)
-- [SIGNAL Help Screen](#signal-help-screen)
 - [NML Fork Specific Run Instructions](#nml-fork-specific-run-instructions)
+- [SIGNAL Help Screen](#signal-help-screen)
 - [Executing SIGNAL - Summary](#summary)
 - [Executing SIGNAL - Detailed](#detailed-setup-and-execution)
   - [Download reference file(s)](#1-download-necessary-database-files)
