@@ -24,6 +24,7 @@ If you use this software please [cite](https://doi.org/10.3390/v12080895):
 
 - [Setup Instructions](#setup)
 - [SIGNAL Help Screen](#signal-help-screen)
+- [NML Fork Specific Run Instructions](#nml-fork-specific-run-instructions)
 - [Executing SIGNAL - Summary](#summary)
 - [Executing SIGNAL - Detailed](#detailed-setup-and-execution)
   - [Download reference file(s)](#1-download-necessary-database-files)
@@ -77,7 +78,68 @@ Additional software dependencies are managed directly by `snakemake` using conda
 - nextclade (v1.11.0) [(docs)](https://docs.nextstrain.org/projects/nextclade/en/stable/)
 - ncov-tools postprocessing scripts require additional dependencies (see [file](https://github.com/jts/ncov-tools/blob/master/workflow/envs/environment.yml)).
 
+## NML Fork Specific Run Instructions
+
+### Help Command:
+
+Running `bash run_signal.sh` will display the following help command with the variables updated to match your system:
+```
+USAGE:
+    bash $SCRIPTPATH/run_signal.sh -d PATH_TO_PAIRED_FASTQ_DIR -p PRIMER_SCHEME <OPTIONAL FLAGS>
+    bash $SCRIPTPATH/run_signal.sh --update
+    
+Flags:
+    NEEDED:
+    -d  --directory      :  Path to paired fastq file directory
+    -p  --primer-scheme  :  Specify input data primer scheme
+            Available Primer Schemes: articV3, articV4, articV4.1, freed, freed_V2_nml, resende, V2resende, custom by passing '--bed' and '--amplicon'
+
+    SUBSTITUTE (Can be used instead of a primer scheme but must be used together):
+    --bed       :  Path to custom primer bed file to be used instead of default schemes
+    --amplicon  :  Path to custom amplicon bed file to be used instead of default schemes
+
+    OPTIONAL:
+    -c  --cores           :  Number of Cores to use in Signal. Default is 3
+    -n  --run-name        :  Run name for final ncov-tools outputs. Default is 'nml'
+    -m  --metadata        :  Add metadata to the run. Must be in TSV format with atleast a column called 'sample'
+    --pdf                 :  If you have pdflatex installed runs ncov-tools pdf output
+    --signal-env          :  Name of signal conda env. Default is '$BASE_ENV_PATH/signal'
+    --ncov-tools-env      :  Name of ncov-tools env. Default is '$BASE_ENV_PATH/ncov-qc-pangolin4'
+                **NOTE** It is highly recommended to let the script generate the environments as it will
+                          only occur once and you won't have to pass the path each time
+
+    OTHER:
+    --update  :  Passing --update will update ncov-tools pip dependencies, pangolin and pangoDATA along with this repo and then exit
+```
+
+### Run Instructions (run_signal.sh):
+
+#### *1. Get Dependencies*
+This pipeline requires a number of files that need to be setup to run. To do so, all that is needed is to run the following bash script:
+```
+bash scripts/get_data_dependencies.sh -d data -a MN908947.3
+```
+
+This will create a directory called 'data' containing all of the needed files. More info is on what is needed is available in the [Detailed setup and execution](#detailed-setup-and-execution) section.
+
+#### *2. Run run_signal.sh*
+Once all of the data dependencies are downloaded, `run_signal.sh` can be ran. The first run through will be slow as it creates the needed environments. All subsequent runs will be significantly faster.
+
+To just run the pipeline:
+```
+bash $SCRIPTPATH/run_signal.sh -d PATH_TO_PAIRED_FASTQ_DIR -p PRIMER_SCHEME <OPTIONAL FLAGS>
+```
+
+Optional arguments can be found above in the [run_signal.sh help command](#help-command)section
+
+### Other Notes
+
+#### *Conda Envs*
+This script manages the conda environments for you to the best of its ability. They are all found in the cloned directory under `.snakemake/conda` in case they need to be manually addressed
+
 ## SIGNAL Help Screen:
+
+**NOTE:** In this fork the `signal.py` script is untested as it was added after the `run_signal.sh` bash script which does mostly the same function of setting up and running the SIGNAL pipeline.
 
 Using the provided `signal.py` script, the majority of SIGNAL functions can be accessed easily.
 
