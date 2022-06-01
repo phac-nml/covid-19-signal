@@ -482,7 +482,7 @@ do
         --pangolin ${pangolin} \
         --ncov_summary ${ncov_qc} \
         --ncov_negative ${ncov_neg} \
-        --revision v1.5.4 \
+        --revision v1.5.5 \
         --script_name covid-19-signal \
         --sequencing_technology illumina \
         --scheme $PRIMER_SCHEME \
