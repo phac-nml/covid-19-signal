@@ -41,7 +41,7 @@ If you use this software please [cite](https://doi.org/10.3390/v12080895):
 
 ### 0. Clone the git repository (`--recursive` only needed to run `ncov-tools` postprocessing)
 
-        git clone --recursive https://github.com/jaleezyy/covid-19-signal
+        git clone --recursive https://github.com/phac-nml/covid-19-signal-nml.git
 
 ### 1. Install `conda` and `snakemake` (version >5) e.g.
 
