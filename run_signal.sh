@@ -321,6 +321,9 @@ if [ "$CUSTOM" = true ]; then
     echo "amplicon_bed: $PATHAMPLICON" >> ./ncov-tools/config.yaml
     echo "primer_bed: $PATHBED" >> ./ncov-tools/config.yaml
 
+    # Clean Up
+    CLEANUP_BED="$PATHBED"
+
 elif [ "$PRIMER_SCHEME" == "articV3" ]; then
     # SIGNAL Parameters
     echo "scheme_bed: 'resources/primer_schemes/artic_v3/nCoV-2019.primer.bed'" >> $SIGNAL_CONFIG
@@ -330,6 +333,9 @@ elif [ "$PRIMER_SCHEME" == "articV3" ]; then
     # NCOV-TOOLS Parameters
     echo "amplicon_bed: $SCRIPTPATH/resources/primer_schemes/artic_v3/ncov-qc_V3.scheme.bed" >> ./ncov-tools/config.yaml
     echo "primer_bed: $SCRIPTPATH/resources/primer_schemes/artic_v3/nCoV-2019.bed" >> ./ncov-tools/config.yaml
+
+    # Clean Up
+    CLEANUP_BED="$SCRIPTPATH/resources/primer_schemes/artic_v3/nCoV-2019.bed"
 
 elif [ "$PRIMER_SCHEME" == "articV4" ]; then
     # SIGNAL Parameters
@@ -341,6 +347,9 @@ elif [ "$PRIMER_SCHEME" == "articV4" ]; then
     echo "amplicon_bed: $SCRIPTPATH/resources/primer_schemes/artic_v4/ncov-qc_V4.scheme.bed" >> ./ncov-tools/config.yaml
     echo "primer_bed: $SCRIPTPATH/resources/primer_schemes/artic_v4/nCoV-2019.bed" >> ./ncov-tools/config.yaml
 
+    # Clean Up
+    CLEANUP_BED="$SCRIPTPATH/resources/primer_schemes/artic_v4/nCoV-2019.bed"
+
 elif [ "$PRIMER_SCHEME" == "articV4.1" ]; then
     # SIGNAL Parameters
     echo "scheme_bed: 'resources/primer_schemes/artic_v4.1/nCoV-2019.bed'" >> $SIGNAL_CONFIG
@@ -350,6 +359,9 @@ elif [ "$PRIMER_SCHEME" == "articV4.1" ]; then
     # NCOV-TOOLS Parameters
     echo "amplicon_bed: $SCRIPTPATH/resources/primer_schemes/artic_v4.1/ncov-qc_V4.scheme.bed" >> ./ncov-tools/config.yaml
     echo "primer_bed: $SCRIPTPATH/resources/primer_schemes/artic_v4.1/nCoV-2019.bed" >> ./ncov-tools/config.yaml
+
+    # Clean Up
+    CLEANUP_BED="$SCRIPTPATH/resources/primer_schemes/artic_v4.1/nCoV-2019.bed"
 
 elif [ "$PRIMER_SCHEME" == "freed" ]; then
     # SIGNAL Parameters
@@ -361,6 +373,9 @@ elif [ "$PRIMER_SCHEME" == "freed" ]; then
     echo "amplicon_bed: $SCRIPTPATH/resources/primer_schemes/freed/ncov-qc_freed.scheme.bed" >> ./ncov-tools/config.yaml
     echo "primer_bed: $SCRIPTPATH/resources/primer_schemes/freed/nCoV-2019.bed" >> ./ncov-tools/config.yaml
 
+    # Clean Up
+    CLEANUP_BED="$SCRIPTPATH/resources/primer_schemes/freed/nCoV-2019.bed"
+
 elif [ "$PRIMER_SCHEME" == "freed_V2_nml" ]; then
     # SIGNAL Parameters
     echo "scheme_bed: 'resources/primer_schemes/freed_V2_nml/nCoV-2019.primer.bed'" >> $SIGNAL_CONFIG
@@ -370,6 +385,9 @@ elif [ "$PRIMER_SCHEME" == "freed_V2_nml" ]; then
     # NCOV-TOOLS Parameters
     echo "amplicon_bed: $SCRIPTPATH/resources/primer_schemes/freed_V2_nml/ncov-qc_freed.scheme.bed" >> ./ncov-tools/config.yaml
     echo "primer_bed: $SCRIPTPATH/resources/primer_schemes/freed_V2_nml/nCoV-2019.bed" >> ./ncov-tools/config.yaml
+
+    # Clean Up
+    CLEANUP_BED="$SCRIPTPATH/resources/primer_schemes/freed_V2_nml/nCoV-2019.bed"
 
 elif [ "$PRIMER_SCHEME" == "resende" ]; then
     # SIGNAL Parameters
@@ -381,6 +399,9 @@ elif [ "$PRIMER_SCHEME" == "resende" ]; then
     echo "amplicon_bed: $SCRIPTPATH/resources/primer_schemes/2kb_resende/ncov-qc_resende.scheme.bed" >> ./ncov-tools/config.yaml
     echo "primer_bed: $SCRIPTPATH/resources/primer_schemes/2kb_resende/nCoV-2019.bed" >> ./ncov-tools/config.yaml
 
+    # Clean Up
+    CLEANUP_BED="$SCRIPTPATH/resources/primer_schemes/2kb_resende/nCoV-2019.bed"
+
 elif [ "$PRIMER_SCHEME" == "V2resende" ]; then
     # SIGNAL Parameters
     echo "scheme_bed: 'resources/primer_schemes/2kb_resende_v2/nCoV-2019.primer.bed'" >> $SIGNAL_CONFIG
@@ -390,14 +411,15 @@ elif [ "$PRIMER_SCHEME" == "V2resende" ]; then
     # NCOV-TOOLS Parameters
     echo "amplicon_bed: $SCRIPTPATH/resources/primer_schemes/2kb_resende_v2/nCoV-2019.bed" >> ./ncov-tools/config.yaml
     echo "primer_bed: $SCRIPTPATH/resources/primer_schemes/2kb_resende_v2/ncov-qc_resende.scheme.bed" >> ./ncov-tools/config.yaml
+
+    # Clean Up
+    CLEANUP_BED="primer_bed: $SCRIPTPATH/resources/primer_schemes/2kb_resende_v2/ncov-qc_resende.scheme.bed"
 fi
 echo "run_name: $RUNNAME" >> ./ncov-tools/config.yaml
 ### END SNAKEMAKE CONFIGS ###
 
-
 # GET WANTED SIGNAL #
 ln -s $SCRIPTPATH/* .
-
 
 ##################
 ### RUN SIGNAL ###
@@ -482,12 +504,13 @@ do
         --pangolin ${pangolin} \
         --ncov_summary ${ncov_qc} \
         --ncov_negative ${ncov_neg} \
-        --revision v1.5.5 \
+        --revision v1.5.6 \
+        --pcr_bed ./resources/pcr_primers.bed \
+        --scheme $PRIMER_SCHEME \
+        --scheme_bed $CLEANUP_BED \
         --script_name covid-19-signal \
         --sequencing_technology illumina \
-        --scheme $PRIMER_SCHEME \
         --snpeff_tsv $snpeff \
-        --pcr_bed ./resources/pcr_primers.bed \
         $cleanup_metadata
 done
 

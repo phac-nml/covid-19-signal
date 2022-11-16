@@ -61,27 +61,31 @@ negative_control_prefix: ['ntc', 'water', 'blank', 'neg']
 # Path from snakemake dir to .bed file defining amplicon primer scheme
 # scheme_bed: Echo'd in at the end during script
 
-# Versions of software related to lineage calling (use numbers only, i.e., 3.1.1). Dates are accepted for pangolearn. Leave blank for latest version(s).
-pangolin: 
-constellations:
-scorpio:
-# Required for Pangolin <v4.0
-pangolearn: 
-pango-designation:
-# Required for Pangolin v4+
-pangolin-data:
-
-# Required for Nextclade (datasets)
-# Be as specific as possible with the desired tag. Can accept dates (YYYY-mm-dd) alone, but will assume corresponding timestamp (HH:MM:SS)
-# Typical tag format is YYYY-mm-ddTHH:MM:SSZ
-# Leave blank for latest dataset
-# Setting nextclade-include-recomb to False will download the recombinant-sequence free version of the Nextclade database
-nextclade-data:
-nextclade-include-recomb: True
-
 # Toggle faster Pangolin analysis at the cost of accuracy (uses Pangolearn instead of Usher)
 # Use for significantly larger datasets
 pangolin_fast: False
+
+# Versions of software related to lineage calling (use numbers only, i.e., 3.1.1). Dates (YYYY-mm-dd) are accepted for pangolearn. Leave blank for latest version(s).
+pangolin: 
+constellations:
+scorpio:
+
+# Required for Pangolin <v4.0
+pangolearn: 
+pango-designation:
+
+# Required for Pangolin v4+
+pangolin-data:
+
+# Versions for Nextclade (software & datasets)
+# Software version (nextclade) should use numbers only (i.e., 1.11.0)
+# Be as specific as possible with the desired dataset tag (nextclade-data). Can accept dates (YYYY-mm-dd) alone, but will assume corresponding timestamp (HH:MM:SS) 
+# Typical tag format is YYYY-mm-ddTHH:MM:SSZ
+# Leave blank for latest versions
+# Setting nextclade-include-recomb to False will download the recombinant-sequence free version of the Nextclade database
+nextclade:
+nextclade-data:
+nextclade-include-recomb: True
 
 # ONLY NEEDED IF USING NCOV-TOOLS SUMMARIES
 # Path from snakemake dir to .bed file defining the actual amplicon locations not the primers
