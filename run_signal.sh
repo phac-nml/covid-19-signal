@@ -480,7 +480,7 @@ fi
 
 # QC Summary #
 ##############
-conda activate $BASE_ENV_PATH/qc_summary_signal
+conda activate $BASE_ENV_PATH/qc_summary_signalv2
 
 for RESULT in $(ls -d signal_results/*/)
 do
