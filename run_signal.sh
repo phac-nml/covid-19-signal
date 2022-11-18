@@ -211,7 +211,7 @@ else
 fi
 
 # Envs needed
-envArray=($SIGNAL_ENV $NCOV_ENV 'snpdist_signal' 'qc_summary_signal' 'type_variants_signal')
+envArray=($SIGNAL_ENV $NCOV_ENV 'snpdist_signal' 'qc_summary_signalv2' 'type_variants_signal')
 ### END INPUTS ###
 
 
