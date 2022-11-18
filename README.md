@@ -1,4 +1,6 @@
-# SARS-CoV-2 Illumina GeNome Assembly Line (SIGNAL)
+# SARS-CoV-2 Illumina GeNome Assembly Line (SIGNAL) - NML Fork
+
+**Fork Note**: This fork is up-to-date with the upstream repo and makes use of conda and mamba to control dependency and environment installation along with running the pipeline all using the bash script called `run_signal.sh` included. If you wish to use the signal.py python script or use the docker container you are better off going to upstream repo and doing it from there.
 
 This is a complete standardized workflow the assembly and subsequent analysis for short-read viral sequencing.
 This core workflow is compatible with the [illumina artic nf pipeline](https://github.com/connor-lab/ncov2019-artic-nf) and produces consensus and variant calls using `iVar` (1.3) [(Grubaugh, 2019)](https://doi.org/10.1186/s13059-018-1618-7) and `Freebayes` [(Garrison, 2012)](https://arxiv.org/abs/1207.3907) .
@@ -41,7 +43,7 @@ If you use this software please [cite](https://doi.org/10.3390/v12080895):
 
 ### 0. Clone the git repository (`--recursive` only needed to run `ncov-tools` postprocessing)
 
-        git clone --recursive https://github.com/phac-nml/covid-19-signal-nml.git
+        git clone https://github.com/phac-nml/covid-19-signal-nml.git
 
 ### 1. Install `conda` and `snakemake` (version >5) e.g.
 
@@ -80,13 +82,20 @@ Additional software dependencies are managed directly by `snakemake` using conda
 
 ## NML Fork Specific Run Instructions
 
+These instructions are specific to running SIGNAL, ncov-tools, and some downstream QC checks using the included `run_signal.sh` bash script.
+
+This process:
+- Makes use of conda and mamba to control dependency installation.
+- Runs SIGNAL --> PostProcess --> ncov-tools --> QC checks
+  - Done using premade SIGNAL and ncov-tools configuration files that are populated based on the command line args
+
 ### Help Command:
 
 Running `bash run_signal.sh` will display the following help command with the variables updated to match your system:
 ```
 USAGE:
-    bash $SCRIPTPATH/run_signal.sh -d PATH_TO_PAIRED_FASTQ_DIR -p PRIMER_SCHEME <OPTIONAL FLAGS>
-    bash $SCRIPTPATH/run_signal.sh --update
+    bash run_signal.sh -d PATH_TO_PAIRED_FASTQ_DIR -p PRIMER_SCHEME <OPTIONAL FLAGS>
+    bash run_signal.sh --update
     
 Flags:
     NEEDED:
@@ -115,27 +124,83 @@ Flags:
 ### Run Instructions (run_signal.sh):
 
 #### *1. Get Dependencies*
-This pipeline requires a number of files that need to be setup to run. To do so, all that is needed is to run the following bash script:
+This pipeline requires a number of files that need to be setup to run. To do so, all that is needed is to run the following bash script once on the first time you are analyzing data:
 ```
+cd covid-19-signal-nml
 bash scripts/get_data_dependencies.sh -d data -a MN908947.3
 ```
 
-This will create a directory called 'data' containing all of the needed files. More info is on what is needed is available in the [Detailed setup and execution](#detailed-setup-and-execution) section.
+This will create a directory called 'data' containing all of the needed files including:
+- Amplicon primer scheme sequences
+- SARS-CoV2 reference fasta
+- SARS-CoV2 reference gbk
+- SARS-CoV2 reference gff3
+- kraken2 viral database
+- Human GRCh38 reference fasta (for composite human-viral BWA index)
+
+**Note: Downloading the database files requires ~10GB of storage, with up to ~35GB required for all temporary downloads!**
 
 #### *2. Run run_signal.sh*
-Once all of the data dependencies are downloaded, `run_signal.sh` can be ran. The first run through will be slow as it creates the needed environments. All subsequent runs will be significantly faster.
+Once all of the data dependencies are downloaded, `run_signal.sh` can be ran. The first run through will be slow as it creates the needed conda environments but all subsequent runs will be significantly faster as they are reused.
 
 To just run the pipeline:
 ```
-bash $SCRIPTPATH/run_signal.sh -d PATH_TO_PAIRED_FASTQ_DIR -p PRIMER_SCHEME <OPTIONAL FLAGS>
+bash run_signal.sh -d PATH_TO_PAIRED_FASTQ_DIR -p PRIMER_SCHEME <OPTIONAL FLAGS>
 ```
 
 Optional arguments can be found above in the [run_signal.sh help command](#help-command)section
 
+### Inputs
+
+- Primer Scheme: What tiled amplicon primer scheme was used to sequence the data
+- Paired fastq directory: Directory containing gziped paired fastq files with `_R1` and `_R2` labels
+  - Ex. Sample1_S1_L001_R1_001.fastq.gz + Sample1_S1_L001_R2_001.fastq.gz
+  - Ex. Sample2_S1_L001_R1.fastq.gz + Sample2_S1_L001_R2.fastq.gz
+  - Ex. Sample3_R1.fastq.gz + Sample3_R1.fastq.gz
+
+### Outputs
+
+SIGNAL Pipeline gives the following main outputs (along with many more) for each sample under their own directory in the `signal_results` directory:
+```
+  - {sample_name}/core/{sample_name}_viral_reference.mapping.primertrimmed.sorted.bam   per-sample sorted primertrimmed alignment file
+  - {sample_name}/freebayes/{sample_name}.consensus.fasta                               per-sample generated consensus sequence
+  - {sample_name}/freebayes/{sample_name}.variants.norm.vcf.gz                          per-sample normalized variant call information
+  - 
+```
+
+Postprocessing handles failing samples gracefully and gives the following summary files:
+```
+  - summary.html                top-level summary, with links to per-sample summaries
+  - {sample_name}/sample.html   per-sample summaries, with links for more detailed info
+  - {sample_name}/sample.txt    per-sample summaries, in text-file format instead of HTML
+  - summary.zip                 zip archive containing all of the above summary files.
+```
+
+Ncov-tools follows up with the following main outputs (and many more) under the `ncov-tools` directory:
+```
+  - plots/{run_name}_tree_snps.pdf                      run-level phylogenetic tree with plotted snps and lineage
+  - plots/{run_name}_depth_by_position.pdf              per-sample coverage depth across the genome in one file
+  - qc_annotation/{sample_name}_aa_table.tsv            per-sample SNPeff amino acid prediction summarys
+  - qc_reports/{run_name}_summary_qc.tsv                run-level summary qc file
+  - qc_reports/{run_name}_mixture_report.tsv            run-level sample mixture report
+  - qc_reports/{run_name}_negative_control_report.tsv   run-level negative control report
+```
+- More info on ncov-tools outputs can be found on the ncov-tools github page: https://github.com/jts/ncov-tools
+
+Final QC, found in the created `signal_*_DATE` folder:
+```
+  - matrix.tsv          snpdists matrix report
+  - {run_name}.qc.csv   overall summary of ncov-tools and other metadata checks in one location
+```
+
 ### Other Notes
 
 #### *Conda Envs*
-This script manages the conda environments for you to the best of its ability. They are all found in the cloned directory under `.snakemake/conda` in case they need to be manually addressed
+This script manages the conda environments for you to the best of its ability. They are all found in the cloned `covid-19-signal-nml` directory under `.snakemake/conda` in case they need to be manually addressed
+
+*End NML Fork Specific Instructions*
+
+---------------------------
 
 ## SIGNAL Help Screen:
 

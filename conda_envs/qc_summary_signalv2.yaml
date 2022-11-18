@@ -4,9 +4,11 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  - biopython
   - bcftools
   - csvtk
   - mafft
+  - matplotlib
   - pandas
   - samtools
   - libxcb
