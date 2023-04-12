@@ -32,7 +32,7 @@ CUSTOM=false
 
 # Conda Parameters #
 BASE_ENV_PATH="$SCRIPTPATH/.snakemake/conda"
-SIGNAL_ENV="signal"
+SIGNAL_ENV="signal-1.6.1"
 USER_SIGNAL=false
 NCOV_ENV="ncov-qc-pangolin4" # pangolin 3 outdated with changes made, env still available though
 USER_NCOV=false
@@ -504,7 +504,7 @@ do
         --pangolin ${pangolin} \
         --ncov_summary ${ncov_qc} \
         --ncov_negative ${ncov_neg} \
-        --revision v1.5.6 \
+        --revision v1.6.1 \
         --pcr_bed ./resources/pcr_primers.bed \
         --scheme $PRIMER_SCHEME \
         --scheme_bed $CLEANUP_BED \
