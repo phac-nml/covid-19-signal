@@ -17,7 +17,7 @@ long_git_id = '$Id: b158164f87c79271ddc9d1083e64e4be1fc26d8e $'
 
 assert long_git_id.startswith('$Id: ')
 #short_git_id = long_git_id[5:12]
-short_git_id = "v1.5.6"
+short_git_id = "v1.6.1"
 
 # Suppresses matplotlib warning (https://github.com/jaleezyy/covid-19-signal/issues/59)
 # Creates a small memory leak, but it's nontrivial to fix, and won't be a practical concern!
@@ -565,7 +565,7 @@ def parse_ivar_variants(tsv_filename, allow_missing=True):
     # Skip first line
     for line in open(tsv_filename).readlines()[1:]:
         t = line.split('\t')
-        assert len(t) == 19
+        assert (len(t) == 19) or (len(t) == 20) # added POS_AA column
 
         if t[3] != '':
             variants.append(f"{t[2]}{t[1]}{t[3]}")

@@ -8,6 +8,7 @@ import pandas as pd
 import shutil
 import os, sys
 from datetime import datetime
+import json
 
 
 def check_file(path: str) -> Path:
@@ -77,7 +78,7 @@ def update_nextclade_dataset(vers, skip):
 	try:
 		if software_ver != "None": # specific version requested, check if available
 			try:
-				softrequest = subprocess.check_output(f"conda search -c bioconda -f nextclade={software_ver}".split()).decode('utf-8').strip().split()[-3]
+				softrequest = subprocess.check_output(f"conda search -c bioconda -f nextclade", shell=True).split()[-3].strip().decode('utf-8')
 				# check if already installed
 				if softrequest == nextclade_version:
 					print(f"Nextclade {softrequest} already installed! Skipping update!")
@@ -86,7 +87,7 @@ def update_nextclade_dataset(vers, skip):
 					subprocess.run(f"conda install -q -y -c bioconda nextclade={softrequest}", shell=True, check=True)
 			except subprocess.CalledProcessError:
 				print("Cannot find version requested, will ensure latest version!")
-				softrequest = subprocess.check_output(f"conda search -c bioconda -f nextclade".split()).decode('utf-8').strip().split()[-3]
+				softrequest = subprocess.check_output(f"conda search -c bioconda -f nextclade", shell=True).split()[-3].strip().decode('utf-8')
 				# check if already installed
 				if softrequest == nextclade_version:
 					print(f"Nextclade {softrequest} already installed! Skipping update!")
@@ -94,7 +95,7 @@ def update_nextclade_dataset(vers, skip):
 					subprocess.run(f"conda install -q -y -c bioconda nextclade={softrequest}", shell=True, check=True)
 		else:
 			print(f"Installing latest version of Nextclade!")
-			softrequest = subprocess.check_output(f"conda search -c bioconda -f nextclade".split()).decode('utf-8').strip().split()[-3]
+			softrequest = subprocess.check_output(f"conda search -c bioconda -f nextclade", shell=True).split()[-3].strip().decode('utf-8')
 			if softrequest == nextclade_version:
 				print(f"Nextclade {softrequest} already installed! Skipping update!")
 			else:
@@ -136,27 +137,53 @@ def update_nextclade_dataset(vers, skip):
 
 	# If specific tag requested, attempt to install, otherwise install latest
 	accession = 'MN908947'
+	current_tag = None
+	if os.path.exists(os.path.join(output_dir, 'tag.json')):
+		j = open(os.path.join(output_dir, 'tag.json'))
+		data = json.load(j)
+		current_tag = data['tag']
+		j.close()
 	if requested is not None:
+		# check existing database, if found
+			if requested == current_tag:
+				print(f"Nextclade dataset {requested} already installed! Skipping update!")
+			else:
+				try:
+					print(f"\nDownloading Nextclade {dataset} dataset tagged {requested} for reference {accession}!")
+					subprocess.run(f"nextclade dataset get "
+								f"--name '{dataset}' "
+								f"--reference '{accession}' "
+								f"--tag {requested} "
+								f"--output-dir '{output_dir}'", shell=True, check=True)
+				except subprocess.CalledProcessError:
+					print(f"\nDatabase not found! Please check whether {requested} tag exists! Downloading latest Nextclade {dataset} dataset for reference {accession}...")
+					try:
+						subprocess.run(f"nextclade dataset get "
+									f"--name '{dataset}' "
+									f"--reference '{accession}' "
+									f"--output-dir '{output_dir}'", shell=True, check=True)
+					except subprocess.CalledProcessError:
+						if current_tag is not None:
+							print(f"Something went wrong updating the Nextclade dataset, using {current_tag} instead!")
+							requested = current_tag
+						else:
+							print(f"Something went wrong updating the Nextclade dataset! No database could be found which may result in errors! Skipping update...")
+							requested = "Unknown"
+	else:
 		try:
-			print(f"\nDownloading Nextclade {dataset} dataset tagged {requested} for reference {accession}!")
+			print(f"\nDownloading latest Nextclade {dataset} dataset for reference {accession}!")
 			subprocess.run(f"nextclade dataset get "
 						f"--name '{dataset}' "
 						f"--reference '{accession}' "
-						f"--tag {requested} "
 						f"--output-dir '{output_dir}'", shell=True, check=True)
 		except subprocess.CalledProcessError:
-			print(f"\nDatabase not found! Please check whether {requested} tag exists! Downloading latest Nextclade {dataset} dataset for reference {accession}...")
-			subprocess.run(f"nextclade dataset get "
-						f"--name '{dataset}' "
-						f"--reference '{accession}' "
-						f"--output-dir '{output_dir}'", shell=True, check=True)
-	else:
-		print(f"\nDownloading latest Nextclade {dataset} dataset for reference {accession}!")
-		subprocess.run(f"nextclade dataset get "
-					f"--name '{dataset}' "
-					f"--reference '{accession}' "
-					f"--output-dir '{output_dir}'", shell=True, check=True)
-
+			if current_tag is not None:
+				print(f"Something went wrong updating the Nextclade dataset, using {current_tag} instead!")
+				requested = current_tag
+			else:
+				print(f"Something went wrong updating the Nextclade dataset! No database could be found which may result in errors! Skipping update...")
+				requested = "Unknown"
+	
 	# Obtain final version information for output
 	nextclade_version = subprocess.run(f"nextclade --version".split(), stdout=subprocess.PIPE).stdout.decode('utf-8').strip().lower()
 	if nextclade_version.startswith("nextclade"):

@@ -27,7 +27,8 @@ dependencies:
   - snpeff=5.0-0
   - icu=68.1
   - boost-cpp=1.74.0
-  - usher
+  - usher>=0.6.2
+  - setuptools<66.0.0
   - pip:
     - dendropy>=4.4.0
     - pyvcf3
