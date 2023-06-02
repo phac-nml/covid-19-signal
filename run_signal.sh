@@ -32,9 +32,9 @@ CUSTOM=false
 
 # Conda Parameters #
 BASE_ENV_PATH="$SCRIPTPATH/.snakemake/conda"
-SIGNAL_ENV="signal-1.6.1"
+SIGNAL_ENV="signal-1.6.2"
 USER_SIGNAL=false
-NCOV_ENV="ncov-qc-pangolin4" # pangolin 3 outdated with changes made, env still available though
+NCOV_ENV="ncov-qc-pangolin4.3" # New 4.3 env to try to fix all the env issues
 USER_NCOV=false
 
 # Values to Check #
@@ -138,7 +138,7 @@ do
         pangolin --update
         pip install ncov-parser --upgrade
         pip install git+https://github.com/jts/ncov-watch.git --upgrade
-        exit
+        exit 0
     else
         echo "ERROR: $1 is not a known argument"
         exit 1
@@ -147,7 +147,7 @@ done
 
 # CHECK INPUTS #
 ################
-
+# Directory of fastqs
 if [ -d "$FASTQ_PAIRS" ]; then
     echo "Directory '$FASTQ_PAIRS' exists"
 else
@@ -162,6 +162,7 @@ else
     fi
 fi
 
+# Primer schemes
 if containsElement "$PRIMER_SCHEME" "${schemeArray[@]}"; then
     echo "Using primer scheme $PRIMER_SCHEME"
 elif [[ $BED != 0 ]] && [[ $AMPLICON != 0 ]]; then
@@ -193,6 +194,7 @@ else
     fi
 fi
 
+# Cores input is an int
 if [[ $CORES == +([0-9]) ]]; then
     echo "Using $CORES cores for analysis"
 else
@@ -200,6 +202,7 @@ else
     exit 1
 fi
 
+# Metadata handling
 if [ $METADATA_TSV = 0 ]; then
     :
 elif [ -f $METADATA_TSV ]; then
@@ -504,7 +507,7 @@ do
         --pangolin ${pangolin} \
         --ncov_summary ${ncov_qc} \
         --ncov_negative ${ncov_neg} \
-        --revision v1.6.1 \
+        --revision v1.6.2 \
         --pcr_bed ./resources/pcr_primers.bed \
         --scheme $PRIMER_SCHEME \
         --scheme_bed $CLEANUP_BED \
