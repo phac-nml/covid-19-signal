@@ -1,4 +1,4 @@
-name: signal
+name: signal-1.6.2
 channels:
   - conda-forge
   - bioconda
@@ -6,5 +6,6 @@ channels:
 dependencies:
   - snakemake
   - pandas
-  - mamba
   - conda
+  - mamba
+  - python
